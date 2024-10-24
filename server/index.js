@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import authRoutes from "./routes/AuthRoutes.js";
 
 // loading environment variable into process.env
 dotenv.config();
@@ -22,6 +23,7 @@ app.use(
 
 app.use(cookieParser()); // using cookieParser to access cookies for user auth
 app.use(express.json()); // converting express server payload body to json format
+app.use("/api/auth", authRoutes);
 
 // starting express server for backend
 const server = app.listen(port, ()=>{
@@ -29,4 +31,6 @@ const server = app.listen(port, ()=>{
 });
 
 // connecting to mongoDB Atlas server for database
-mongoose.connect(databaseURL, {}).then(()=>console.log("database connected")).catch(err=>console.log(err.message));
+mongoose.connect(databaseURL, {})
+    .then(() => console.log("database connected"))
+    .catch(err=>console.log(err.message));
