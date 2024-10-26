@@ -21,6 +21,8 @@ app.use(
     })
 );
 
+app.use("/uploads/profiles", express.static("uploads/profiles"))
+
 app.use(cookieParser()); // using cookieParser to access cookies for user auth
 app.use(express.json()); // converting express server payload body to json format
 app.use("/api/auth", authRoutes);
