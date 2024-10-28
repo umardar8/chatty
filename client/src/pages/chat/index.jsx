@@ -17,11 +17,13 @@ const Chat = () => {
             }
         }, [userInfo, navigate]
     )
-    return <div className='flex h-[100vh] overflow-hidden text-white'>
-        <ContactsContainer />
-        <EmptyChatContainer />
-        <ChatContainer />
-    </div>
+    return (
+        <div className='flex h-[100vh] overflow-hidden text-white'>
+            <ContactsContainer />
+            {/* <EmptyChatContainer /> */}
+            <ChatContainer />
+        </div>
+    )
 }
 
 export default Chat;
