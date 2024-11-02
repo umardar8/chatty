@@ -5,6 +5,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/AuthRoutes.js";
 import contactsRoutes from "./routes/ContactRoutes.js";
+import setupSocket from "./socket.js";
+import messagesRoutes from "./routes/MessagesRoutes.js";
 
 // loading environment variable into process.env
 dotenv.config();
@@ -29,11 +31,14 @@ app.use(express.json()); // converting express server payload body to json forma
 
 app.use("/api/auth", authRoutes);
 app.use("/api/contacts", contactsRoutes)
+app.use("/api/messages", messagesRoutes)
 
 // starting express server for backend
 const server = app.listen(port, ()=>{
     console.log(`Server is running at http://localhost:${port}`)
 });
+
+setupSocket(server)
 
 // connecting to mongoDB Atlas server for database
 mongoose.connect(databaseURL, {})

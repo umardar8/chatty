@@ -7,13 +7,13 @@ const ContactsContainer = () => {
       <div className="pt-3">
         <Logo />
       </div>
-      <div className="my-5">
+      <div className="my-5 ml-5">
         <div className="flex items-center justify-between pr-10">
           <Title text="Direct Messages" />
           <NewDM />
         </div>
       </div>
-      <div className="my-5">
+      <div className="my-5 ml-5">
         <div className="flex items-center justify-between pr-10">
           <Title text="Nearby Promotions" />
         </div>
@@ -41,7 +41,7 @@ const Logo = () => {
         <path d="M35.5 0H51.5L32.5 32H16.5L35.5 0Z" className="ccompli1" fill="#975aed"></path>{" "}
         <path d="M19.5 0H31.5L12.5 32H0.5L19.5 0Z" className="ccompli2" fill="#a16ee8"></path>{" "}
       </svg>
-      <span className="text-3xl font-semibold">MUET AR CHAT</span>
+      <span className="text-2xl font-semibold">MUET AR CHAT</span>
     </div>
   )
 }
