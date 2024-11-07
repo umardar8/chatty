@@ -7,26 +7,26 @@ import { RiEmojiStickerLine } from "react-icons/ri";
 import { MdOutlineAddLocationAlt } from "react-icons/md";
 import GeocoderControl from "../geocoder-control";
 import { Map } from "react-map-gl";
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Separator } from "@/components/ui/separator"
-import { addDays, format } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
+import { addDays, format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { FaLocationPinLock } from "react-icons/fa6";
-import { cn } from "@/lib/utils"
-import { Calendar } from "@/components/ui/calendar"
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogHeader,
@@ -58,6 +58,10 @@ const MessageBar = () => {
       address: result?.place_name,
       longitude: longitude,
       latitude: latitude,
+      startDate: startDate,
+      startTime: startTime,
+      endDate: endDate,
+      endTime: endTime,
     };
     setLocation(data);
   };
@@ -91,29 +95,23 @@ const MessageBar = () => {
   };
 
   const handleSendMessage = async () => {
-    if (location) {
-      if (selectedChatType === "contact") {
-        socket.emit("sendMessage", {
-          sender: userInfo.id,
-          content: message,
-          recipient: selectedChatData._id,
-          messageType: "text",
-          fileUrl: undefined,
-          location: location,
-        });
-      }
-    } else {
-      if (selectedChatType === "contact") {
-        socket.emit("sendMessage", {
-          sender: userInfo.id,
-          content: message,
-          recipient: selectedChatData._id,
-          messageType: "text",
-          fileUrl: undefined,
-          location: undefined
-        });
-      }
+    // Check if location has valid data
+    const hasLocation = location && location.longitude && location.latitude;
+
+    if (selectedChatType === "contact") {
+      socket.emit("sendMessage", {
+        sender: userInfo.id,
+        content: message,
+        recipient: selectedChatData._id,
+        messageType: "text",
+        fileUrl: undefined,
+        location: hasLocation ? location : undefined,
+      });
     }
+
+    // Reset location after sending
+    setLocation(null); // Set to `null` instead of an empty object
+    setMessage(""); // Clear the message input as well if needed
   };
 
   return (
@@ -128,11 +126,14 @@ const MessageBar = () => {
         />
         <div className="relative flex">
           <button
-            className="text-neutral-500 focus:border-none focus:outline-none 
-                        focus:text-white transition-all duration-300"
+            className="text-neutral-500 focus:border-none focus:outline-none focus:text-white transition-all duration-300"
             onClick={() => setLocationPickerOpen(true)}
           >
-            {location ? <FaLocationPinLock className="text-2xl text-[#158b3d]" /> : <MdOutlineAddLocationAlt className="text-3xl" />}
+            {location && location.longitude && location.latitude ? (
+              <FaLocationPinLock className="text-2xl text-[#158b3d]" />
+            ) : (
+              <MdOutlineAddLocationAlt className="text-3xl" />
+            )}
           </button>
           <Dialog
             open={locationPickerOpen}
@@ -151,6 +152,7 @@ const MessageBar = () => {
                   latitude: 43.6568,
                   zoom: 13,
                 }}
+                
                 mapStyle="mapbox://styles/mapbox/streets-v9"
                 mapboxAccessToken={
                   "pk.eyJ1IjoidW1hcmRhcjgiLCJhIjoiY2tic3VlczlyMDNuMDJycnE0eWxibDVsZSJ9.NaBkb4_2kJoSMVUp27W51w"
@@ -189,113 +191,143 @@ const MessageBar = () => {
                 <Separator />
               </DialogHeader>
               <div className="flex gap-5 flex-col">
-              <h3>Select Time to Deliver Message.</h3>
-              <div className="flex gap-2">
-                {/* start Date */}
-                <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant={"secondary"}
-          className={cn(
-            "w-[280px] justify-start text-left font-normal",
-            !startDate && "text-muted-foreground"
-          )}
-        >
-          <CalendarIcon />
-          {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
-        <Select
-          onValueChange={(value) =>
-            setStartDate(addDays(new Date(), parseInt(value)))
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select" />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            <SelectItem value="0">Today</SelectItem>
-            <SelectItem value="1">Tomorrow</SelectItem>
-            <SelectItem value="3">In 3 days</SelectItem>
-            <SelectItem value="7">In a week</SelectItem>
-          </SelectContent>
-        </Select>
-        <div className="rounded-md border">
-          <Calendar mode="single" selected={startDate} onSelect={setStartDate} />
-        </div>
-      </PopoverContent>
-    </Popover>
-                <input 
-                  type="time" 
-                  className="bg-white text-black rounded-lg px-2" 
-                  onChange={(e)=>{setStartTime(e.target.value)}}
+                <h3>Select Time to Deliver Message.</h3>
+                <div className="flex gap-2">
+                  {/* start Date */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"secondary"}
+                        className={cn(
+                          "w-[280px] justify-start text-left font-normal",
+                          !startDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon />
+                        {startDate ? (
+                          format(startDate, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
+                      <Select
+                        onValueChange={(value) =>
+                          setStartDate(addDays(new Date(), parseInt(value)))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent position="popper">
+                          <SelectItem value="0">Today</SelectItem>
+                          <SelectItem value="1">Tomorrow</SelectItem>
+                          <SelectItem value="3">In 3 days</SelectItem>
+                          <SelectItem value="7">In a week</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <div className="rounded-md border">
+                        <Calendar
+                          mode="single"
+                          selected={startDate}
+                          onSelect={setStartDate}
+                        />
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                  <input
+                    type="time"
+                    className="bg-white text-black rounded-lg px-2"
+                    onChange={(e) => {
+                      setStartTime(e.target.value);
+                    }}
                   />
-              </div>
-              <h3>Select Time for Message to Expire.</h3>
-              <div className="flex gap-2">
-                {/* End Date */}
-                <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant={"secondary"}
-          className={cn(
-            "w-[280px] justify-start text-left font-normal",
-            !endDate && "text-muted-foreground"
-          )}
-        >
-          <CalendarIcon />
-          {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
-        <Select
-          onValueChange={(value) =>
-            setEndDate(addDays(new Date(), parseInt(value)))
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select" />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            <SelectItem value="0">Today</SelectItem>
-            <SelectItem value="1">Tomorrow</SelectItem>
-            <SelectItem value="3">In 3 days</SelectItem>
-            <SelectItem value="7">In a week</SelectItem>
-          </SelectContent>
-        </Select>
-        <div className="rounded-md border">
-          <Calendar mode="single" selected={endDate} onSelect={setEndDate} />
-        </div>
-      </PopoverContent>
-    </Popover>
-                <input
-                  type="time"
-                  className="bg-white text-black rounded-lg px-2"
-                  onChange={(e) => setEndTime(e.target.value)}
-                />
-              </div>
-              <Separator />
-              <RadioGroup defaultValue="option-one" className="flex">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="option-one" id="option-one" className="bg-[#ffffff]" />
-                  <Label htmlFor="option-one">Request</Label>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="option-two" id="option-two" className="bg-[#ffffff]"/>
-                  <Label htmlFor="option-two">Review</Label>
+                <h3>Select Time for Message to Expire.</h3>
+                <div className="flex gap-2">
+                  {/* End Date */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"secondary"}
+                        className={cn(
+                          "w-[280px] justify-start text-left font-normal",
+                          !endDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon />
+                        {endDate ? (
+                          format(endDate, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
+                      <Select
+                        onValueChange={(value) =>
+                          setEndDate(addDays(new Date(), parseInt(value)))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent position="popper">
+                          <SelectItem value="0">Today</SelectItem>
+                          <SelectItem value="1">Tomorrow</SelectItem>
+                          <SelectItem value="3">In 3 days</SelectItem>
+                          <SelectItem value="7">In a week</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <div className="rounded-md border">
+                        <Calendar
+                          mode="single"
+                          selected={endDate}
+                          onSelect={setEndDate}
+                        />
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                  <input
+                    type="time"
+                    className="bg-white text-black rounded-lg px-2"
+                    onChange={(e) => setEndTime(e.target.value)}
+                  />
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="option-three" id="option-three" className="bg-[#ffffff]" />
-                  <Label htmlFor="option-two">Suggestion</Label>
-                </div>
-              </RadioGroup>
-              <Button
-                className="bg-[#8417ff] px-10 py-2"
-                onClick={() => setTimePickerOpen(false)}
-              >
-                Add to Message
-              </Button>
+                <Separator />
+                <RadioGroup defaultValue="option-one" className="flex">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      value="option-one"
+                      id="option-one"
+                      className="bg-[#ffffff]"
+                    />
+                    <Label htmlFor="option-one">Request</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      value="option-two"
+                      id="option-two"
+                      className="bg-[#ffffff]"
+                    />
+                    <Label htmlFor="option-two">Review</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      value="option-three"
+                      id="option-three"
+                      className="bg-[#ffffff]"
+                    />
+                    <Label htmlFor="option-two">Suggestion</Label>
+                  </div>
+                </RadioGroup>
+                <Button
+                  className="bg-[#8417ff] px-10 py-2"
+                  onClick={() => setTimePickerOpen(false)}
+                >
+                  Add to Message
+                </Button>
               </div>
             </DialogContent>
           </Dialog>

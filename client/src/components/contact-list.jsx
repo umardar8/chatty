@@ -10,7 +10,7 @@ const ContactList = ({ contacts, isChannel = false}) => {
         setSelectedChatType, 
         selectedChatData, 
         setSelectedChatData, 
-        setSelectedChatMessages 
+        setSelectedChatMessages,
     } = useAppStore()
 
     const handleClick = (contact)=> {
@@ -24,7 +24,7 @@ const ContactList = ({ contacts, isChannel = false}) => {
     }
   return (
     <div className="mt-5">
-        {contacts.map((contact)=>{
+        {contacts.map((contact)=>(
             <div 
                 key={contact._id} 
                 className={`
@@ -81,9 +81,8 @@ const ContactList = ({ contacts, isChannel = false}) => {
                         : <span>{`${contact.firstName} ${contact.lastName}`}</span>
                     }
                 </div>
-                {contact._id}
-            </div>
-        })}
+            </div>)
+        )}
     </div>
   )
 }

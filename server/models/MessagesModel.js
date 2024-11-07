@@ -35,6 +35,22 @@ const messageSchema = new mongoose.Schema({
     location: {
         type: Object,
         required: false,
+    },
+    startTime: {
+        type: Date,
+        required: false,
+    },
+    startDate: {
+        type: Date,
+        required: false,
+    },
+    endTime: {
+        type: Date,
+        required: false,
+    },
+    endDate: {
+        type: Date,
+        required: false,
     }
 })
 

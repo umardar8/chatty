@@ -33,7 +33,7 @@ const ContactsContainer = () => {
           <Title text="Direct Messages" />
           <NewDM />
         </div>
-        <div className="max-h-[30vh] overflow-y-auto scrollbar-hidden">
+        <div className="max-h-[50vh] overflow-y-auto scrollbar-hidden">
           <ContactList contacts={directMessagesContacts} />
         </div>
       </div>

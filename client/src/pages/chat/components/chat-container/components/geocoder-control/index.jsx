@@ -18,7 +18,7 @@ export default function GeocoderControl({
     () => {
       const ctrl = new MapboxGeocoder({
         ...props,
-        marker: false,
+        marker: true,
         accessToken: mapboxAccessToken
       });
       ctrl.on('loading', onLoading);
