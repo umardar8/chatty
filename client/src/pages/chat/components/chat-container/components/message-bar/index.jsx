@@ -1,7 +1,7 @@
 import { useSocket } from "@/context/SocketContext";
 import { useAppStore } from "@/store";
 import EmojiPicker from "emoji-picker-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { IoSend } from "react-icons/io5";
 import { RiEmojiStickerLine } from "react-icons/ri";
 import { MdOutlineAddLocationAlt } from "react-icons/md";
@@ -49,6 +49,7 @@ const MessageBar = () => {
   const [endDate, setEndDate] = useState();
   const [endTime, setEndTime] = useState();
   const [location, setLocation] = useState({});
+  // const [timeDate, setTimeDate] = useState({});
 
   const getResults = ({ result }) => {
     console.log({ result });
@@ -73,25 +74,15 @@ const MessageBar = () => {
     };
   }, [emojiRef]);
 
-  //   useEffect(() => {
-  //     function handleClickOutside(event) {
-  //       if (locationRef.current && !locationRef.current.contains(event.target)) {
-  //         setLocationPickerOpen(false);
-  //       }
-  //     }
-  //     document.addEventListener("mousedown", handleClickOutside);
-  //     return () => {
-  //       document.removeEventListener("mousedown", handleClickOutside);
-  //     };
-  //   }, [locationRef]);
-
   const handleAddEmoji = (emoji) => {
     setMessage((msg) => msg + emoji.emoji);
   };
 
   const handleSendMessage = async () => {
+    
+    // assignTimeDate()
+    
     // Check if location has valid data
-
     if (selectedChatType === "contact") {
       socket.emit("sendMessage", {
         sender: userInfo.id,
@@ -163,6 +154,7 @@ const MessageBar = () => {
                   position="top-left"
                   onResult={getResults}
                 />
+
               </Map>
               <Button
                 className="bg-[#8417ff] px-10 py-2"

@@ -36,6 +36,22 @@ const messageSchema = new mongoose.Schema({
         type: Object,
         required: false,
     },
+    startDate: {
+        type: String,
+        required: false
+    },
+    startTime: {
+        type: String,
+        required: false
+    },
+    endDate: {
+        type: String,
+        required: false
+    },
+    endTime: {
+        type: String,
+        required: false
+    },
 })
 
 const Message = mongoose.model("Messages", messageSchema)

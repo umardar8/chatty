@@ -2,7 +2,7 @@ import { apiClient } from "@/lib/api-client";
 import { useAppStore } from "@/store";
 import { GET_ALL_MESSAGES_ROUTE } from "@/utils/constants";
 import moment from "moment/moment";
-import { Map, Marker, NavigationControl } from "react-map-gl";
+import { Map } from "react-map-gl";
 import { useEffect, useRef, useState } from "react";
 import { FaLocationPinLock } from "react-icons/fa6";
 import { FaClock } from "react-icons/fa";
@@ -12,15 +12,16 @@ import {
   DialogTitle,
   DialogContent,
 } from "@/components/ui/dialog";
-import GeocoderControl from "../geocoder-control";
-import Pin from "../pin";
 
 const MessageContainer = () => {
   const scrollRef = useRef(null);
   const currentDate = new Date();
   const [showLocation, setShowLocation] = useState(false);
-  const d1 = new Date();
-  const d2 = new Date();
+  const arePointsNear = (expectedLocation) => {
+    var dx = currentLocation.currentLatitude - expectedLocation.latitude;
+    var dy = currentLocation.currentLongitude - expectedLocation.longitude;
+    return Math.sqrt(dx * dx + dy * dy) <= 10;
+  };
   const [currentLocation, setCurrentLocation] = useState({
     currentLatitude: null,
     currentLongitude: null,
@@ -28,7 +29,6 @@ const MessageContainer = () => {
   const {
     selectedChatType,
     selectedChatData,
-    userInfo,
     selectedChatMessages,
     setSelectedChatMessages,
   } = useAppStore();
@@ -53,7 +53,6 @@ const MessageContainer = () => {
       console.log("Unable to retrieve your location");
     }
   }, []);
-
   useEffect(() => {
     const getMessages = async () => {
       try {
@@ -70,6 +69,7 @@ const MessageContainer = () => {
         console.log(error);
       }
     };
+
     if (selectedChatData._id) {
       if (selectedChatType === "contact") getMessages();
     }
@@ -101,86 +101,92 @@ const MessageContainer = () => {
   };
 
   const renderDMMessages = (message) => (
-    <div
-      className={`
+    <div className={`${ message.sender === selectedChatData._id ? "text-left" : "text-right" }`}>
+
+      <div
+        className={`
           ${
-            message.sender === selectedChatData._id ? "text-left" : "text-right"
-          }
+            message.sender !== selectedChatData._id
+              ? "bg-[#00ccff]/5 text-[#00ccff]/90 border-[#00ccff]/50"
+              : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
+          } border inline-block p-4 rounded my-1 max-w-[50%] break-words
         `}
-    >
-      {message.messageType === "text" && message.location === undefined ? (
-        <div
-          className={`
-                ${
-                  message.sender !== selectedChatData._id
-                    ? "bg-[#00ccff]/5 text-[#00ccff]/90 border-[#00ccff]/50"
-                    : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
-                } border inline-block p-4 rounded my-1 max-w-[50%] break-words
+      >
+
+        {message.messageType === "text" && message.location === undefined 
+        ? (message.content) 
+        : moment(currentDate).format("LL") >= moment(message?.startDate).format("LL") &&
+          moment(currentDate).format("LT") >= message?.startTime 
+          ? (
+          <>
+            {message.content}
+            <div
+              className={`
+                ${ message.sender === selectedChatData._id ? "justify-start" : "justify-end" } 
+                pt-2 flex text-[#808080] gap-2 text-xs items-center hover:cursor-pointer hover:underline
               `}
-        >
-          {message.content}
-        </div>
-      ) : (
-        <div
-          className={`
+              onClick={() => setShowLocation(true)}
+            >
+              {message?.location?.location} <FaLocationPinLock />
+            </div>
+            <div
+              className={`
                 ${
-                  message.sender !== selectedChatData._id
-                    ? "bg-[#00ccff]/5 text-[#00ccff]/90 border-[#00ccff]/50"
-                    : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
-                }
-                border inline-block p-4 rounded my-1 max-w-[50%] break-words
+                  message.sender === selectedChatData._id ? "justify-start" : "justify-end"
+                } flex gap-4 text-[#808080] text-xs mt-2
               `}
-        >
-          {moment(currentDate).format("LL") >= moment(message?.startDate).format("LL") &&
-            moment(currentDate).format("LT") >= message?.startTime ? (
-            <>
-              {message.content}
-              <div
-                className="pt-2 flex text-[#808080] gap-2 text-xs 
-                  items-center hover:cursor-pointer hover:underline"
-                onClick={() => setShowLocation(true)}
-              >
-                {message?.location?.location} <FaLocationPinLock />
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col">
-              <p>
-                You have a new message at{" "}
-                <span
-                  className="underline cursor-pointer"
-                  onClick={() => setShowLocation(true)}
-                >
-                  {message?.location?.location}
-                </span>
-              </p>
-              <div
-                className={`${
-                  message.sender === selectedChatData._id
-                    ? "justify-start"
-                    : "justify-end"
-                } 
-                  flex gap-4 text-[#808080] text-xs mt-2`}
-              >
-                <span className="flex gap-2 items-center">
-                  <FaClock className="text-green-500" />
-                  {`
+            >
+              <span className="flex gap-2 items-center">
+                <FaClock className="text-green-500" />
+                {`
                     ${moment(message?.startDate).format("ll")} 
                     ${message?.startTime} 
                   `}
-                </span>
-                <span className="flex gap-2 items-center">
-                  <FaClock className="text-red-400" />
-                  {`
+              </span>
+              <span className="flex gap-2 items-center">
+                <FaClock className="text-red-400" />
+                {`
                     ${moment(message?.endDate).format("ll")}  
                     ${message?.endTime}
                   `}
-                </span>
-              </div>
+              </span>
             </div>
-          )}
-        </div>
-      )}
+          </>
+        ) : (
+          <div className="flex flex-col">
+            <p>
+              You have a new message at{" "}
+              <span
+                className="underline cursor-pointer"
+                onClick={() => setShowLocation(true)}
+              >
+                {message?.location?.location}
+              </span>
+            </p>
+            <div
+              className={`
+                ${ message.sender === selectedChatData._id ? "justify-start" : "justify-end" } 
+                flex gap-4 text-[#808080] text-xs mt-2
+              `}
+            >
+              <span className="flex gap-2 items-center">
+                <FaClock className="text-green-500" />
+                {`
+                    ${moment(message?.startDate).format("ll")} 
+                    ${message?.startTime} 
+                `}
+              </span>
+              <span className="flex gap-2 items-center">
+                <FaClock className="text-red-400" />
+                {`
+                    ${moment(message?.endDate).format("ll")}  
+                    ${message?.endTime}
+                `}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
       <div className="text-xs text-gray-600 ">
         {moment(message.timestamp).format("LT")}
       </div>
@@ -199,15 +205,7 @@ const MessageContainer = () => {
             mapboxAccessToken={
               "pk.eyJ1IjoidW1hcmRhcjgiLCJhIjoiY2tic3VlczlyMDNuMDJycnE0eWxibDVsZSJ9.NaBkb4_2kJoSMVUp27W51w"
             }
-          >
-            {/* <Marker
-              longitude={message?.location?.longitude}
-              latitude={message?.location?.latitude}
-              anchor="bottom"
-            >
-              <Pin size={20} />
-            </Marker> */}
-          </Map>
+          ></Map>
         </DialogContent>
       </Dialog>
     </div>

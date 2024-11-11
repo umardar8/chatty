@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useControl, Marker } from 'react-map-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 
@@ -13,6 +13,29 @@ export default function GeocoderControl({
   ...props
 }) {
   const [markerState, setMarkerState] = useState(null);
+
+  const [events, logEvents] = useState({});
+  const [mapMarker, setMapMarker] = useState({
+    latitude: null,
+    longitude: null,
+  });
+
+  const onMarkerDragStart = useCallback((event) => {
+    logEvents(_events => ({..._events, onDragStart: event.lngLat}));
+  }, []);
+
+  const onMarkerDrag = useCallback((event) => {
+    logEvents(_events => ({..._events, onDrag: event.lngLat}));
+
+    setMapMarker({
+      longitude: event.lngLat.lng,
+      latitude: event.lngLat.lat
+    });
+  }, []);
+
+  const onMarkerDragEnd = useCallback((event) => {
+    logEvents(_events => ({..._events, onDragEnd: event.lngLat}));
+  }, []);
 
   const geocoder = useControl(
     () => {
@@ -32,7 +55,18 @@ export default function GeocoderControl({
           (result.center || (result.geometry && result.geometry.type === 'Point' && result.geometry.coordinates));
         if (location && marker) {
           const markerProps = typeof marker === 'object' ? marker : {};
-          setMarkerState(<Marker {...markerProps} longitude={location[0]} latitude={location[1]} />);
+          setMarkerState(
+            <Marker 
+                {...markerProps} 
+                longitude={mapMarker.longitude ? mapMarker.longitude : location[0]} 
+                latitude={mapMarker.latitude ? mapMarker.latitude : location[1]}
+                anchor="bottom"
+                draggable
+                onDragStart={onMarkerDragStart}
+                onDrag={onMarkerDrag}
+                onDragEnd={onMarkerDragEnd}
+            />
+        );
         } else {
           setMarkerState(null);
         }
