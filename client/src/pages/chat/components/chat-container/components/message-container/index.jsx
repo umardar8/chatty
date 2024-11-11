@@ -2,9 +2,10 @@ import { apiClient } from "@/lib/api-client";
 import { useAppStore } from "@/store";
 import { GET_ALL_MESSAGES_ROUTE } from "@/utils/constants";
 import moment from "moment/moment";
-import { Map } from "react-map-gl";
+import { Map, Marker, NavigationControl } from "react-map-gl";
 import { useEffect, useRef, useState } from "react";
 import { FaLocationPinLock } from "react-icons/fa6";
+import { FaClock } from "react-icons/fa";
 import {
   Dialog,
   DialogHeader,
@@ -12,11 +13,18 @@ import {
   DialogContent,
 } from "@/components/ui/dialog";
 import GeocoderControl from "../geocoder-control";
+import Pin from "../pin";
 
 const MessageContainer = () => {
-  const scrollRef = useRef();
+  const scrollRef = useRef(null);
+  const currentDate = new Date();
   const [showLocation, setShowLocation] = useState(false);
-  const [currentLocation, setCurrentLocation] = useState({});
+  const d1 = new Date();
+  const d2 = new Date();
+  const [currentLocation, setCurrentLocation] = useState({
+    currentLatitude: null,
+    currentLongitude: null,
+  });
   const {
     selectedChatType,
     selectedChatData,
@@ -69,11 +77,9 @@ const MessageContainer = () => {
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behaviour: "smooth" });
+      scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [selectedChatMessages]);
-
-  
 
   const renderMessages = () => {
     let lastDate = null;
@@ -125,20 +131,53 @@ const MessageContainer = () => {
                 border inline-block p-4 rounded my-1 max-w-[50%] break-words
               `}
         >
-          {currentLocation.currentLatitude === message?.location?.latitude &&
-          currentLocation.currentLongitude === message?.location?.longitude ? (
+          {moment(currentDate).format("LL") >= moment(message?.startDate).format("LL") &&
+            moment(currentDate).format("LT") >= message?.startTime ? (
             <>
               {message.content}
               <div
                 className="pt-2 flex text-[#808080] gap-2 text-xs 
-            items-center hover:cursor-pointer hover:underline"
+                  items-center hover:cursor-pointer hover:underline"
                 onClick={() => setShowLocation(true)}
               >
                 {message?.location?.location} <FaLocationPinLock />
               </div>
             </>
           ) : (
-            <>You have a new message at {message?.location?.location}</>
+            <div className="flex flex-col">
+              <p>
+                You have a new message at{" "}
+                <span
+                  className="underline cursor-pointer"
+                  onClick={() => setShowLocation(true)}
+                >
+                  {message?.location?.location}
+                </span>
+              </p>
+              <div
+                className={`${
+                  message.sender === selectedChatData._id
+                    ? "justify-start"
+                    : "justify-end"
+                } 
+                  flex gap-4 text-[#808080] text-xs mt-2`}
+              >
+                <span className="flex gap-2 items-center">
+                  <FaClock className="text-green-500" />
+                  {`
+                    ${moment(message?.startDate).format("ll")} 
+                    ${message?.startTime} 
+                  `}
+                </span>
+                <span className="flex gap-2 items-center">
+                  <FaClock className="text-red-400" />
+                  {`
+                    ${moment(message?.endDate).format("ll")}  
+                    ${message?.endTime}
+                  `}
+                </span>
+              </div>
+            </div>
           )}
         </div>
       )}
@@ -161,13 +200,13 @@ const MessageContainer = () => {
               "pk.eyJ1IjoidW1hcmRhcjgiLCJhIjoiY2tic3VlczlyMDNuMDJycnE0eWxibDVsZSJ9.NaBkb4_2kJoSMVUp27W51w"
             }
           >
-            <GeocoderControl
-              mapboxAccessToken={
-                "pk.eyJ1IjoidW1hcmRhcjgiLCJhIjoiY2tic3VlczlyMDNuMDJycnE0eWxibDVsZSJ9.NaBkb4_2kJoSMVUp27W51w"
-              }
-              position="top-left"
-              marker={true}
-            />
+            {/* <Marker
+              longitude={message?.location?.longitude}
+              latitude={message?.location?.latitude}
+              anchor="bottom"
+            >
+              <Pin size={20} />
+            </Marker> */}
           </Map>
         </DialogContent>
       </Dialog>

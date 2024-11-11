@@ -44,24 +44,19 @@ const MessageBar = () => {
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
   const [timePickerOpen, setTimePickerOpen] = useState(false);
-  const [startDate, setStartDate] = useState(new Date());
-  const [startTime, setStartTime] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
-  const [endTime, setEndTime] = useState(new Date());
+  const [startDate, setStartDate] = useState();
+  const [startTime, setStartTime] = useState();
+  const [endDate, setEndDate] = useState();
+  const [endTime, setEndTime] = useState();
   const [location, setLocation] = useState({});
 
   const getResults = ({ result }) => {
     console.log({ result });
-    const [longitude, latitude] = result?.geometry?.coordinates;
     const data = {
       location: result?.text,
       address: result?.place_name,
-      longitude: longitude,
-      latitude: latitude,
-      startDate: startDate,
-      startTime: startTime,
-      endDate: endDate,
-      endTime: endTime,
+      longitude: result?.geometry?.coordinates[0],
+      latitude: result?.geometry?.coordinates[1],
     };
     setLocation(data);
   };
@@ -96,7 +91,6 @@ const MessageBar = () => {
 
   const handleSendMessage = async () => {
     // Check if location has valid data
-    const hasLocation = location && location.longitude && location.latitude;
 
     if (selectedChatType === "contact") {
       socket.emit("sendMessage", {
@@ -105,7 +99,11 @@ const MessageBar = () => {
         recipient: selectedChatData._id,
         messageType: "text",
         fileUrl: undefined,
-        location: hasLocation ? location : undefined,
+        location: location ? location : undefined,
+        startDate: startDate,
+        startTime: startTime,
+        endDate: endDate,
+        endTime: endTime,
       });
     }
 
@@ -163,7 +161,6 @@ const MessageBar = () => {
                     "pk.eyJ1IjoidW1hcmRhcjgiLCJhIjoiY2tic3VlczlyMDNuMDJycnE0eWxibDVsZSJ9.NaBkb4_2kJoSMVUp27W51w"
                   }
                   position="top-left"
-                  marker={true}
                   onResult={getResults}
                 />
               </Map>
