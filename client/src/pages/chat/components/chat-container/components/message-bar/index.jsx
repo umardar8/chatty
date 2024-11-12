@@ -6,7 +6,10 @@ import { IoSend } from "react-icons/io5";
 import { RiEmojiStickerLine } from "react-icons/ri";
 import { MdOutlineAddLocationAlt } from "react-icons/md";
 import GeocoderControl from "../geocoder-control";
-import { Map } from "react-map-gl";
+import { Map, Layer, useControl, Marker } from "react-map-gl";
+import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
@@ -36,6 +39,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
+function DeckGLOverlay(props) {
+  const overlay = useControl(() => new DeckOverlay(props));
+  overlay.setProps(props);
+  return null;
+}
+
 const MessageBar = () => {
   const emojiRef = useRef();
   const socket = useSocket();
@@ -49,7 +58,54 @@ const MessageBar = () => {
   const [endDate, setEndDate] = useState();
   const [endTime, setEndTime] = useState();
   const [location, setLocation] = useState({});
-  // const [timeDate, setTimeDate] = useState({});
+
+  // const layers = [
+  //   new ScatterplotLayer({
+  //     id: 'deckgl-circle',
+  //     data: [
+  //       {position: [0.45, 51.47]}
+  //     ],
+  //     getPosition: d => d.position,
+  //     getFillColor: [255, 0, 0, 100],
+  //     getRadius: 1000,
+  //     beforeId: 'waterway-label' // In interleaved mode render the layer under map labels
+  //   })
+  // ];
+
+  // const skyLayer = {
+  //   id: 'sky',
+  //   type: 'sky',
+  //   paint: {
+  //     'sky-type': 'atmosphere',
+  //     'sky-atmosphere-sun': [0.0, 0.0],
+  //     'sky-atmosphere-sun-intensity': 15
+  //   }
+  // };
+
+  const threeDLayer = {
+    id: '3d-buildings',
+    source: 'composite',
+    'source-layer': 'building',
+    filter: ['==', 'extrude', 'true'],
+    type: 'fill-extrusion',
+    minzoom: 15,
+    paint: {
+      'fill-extrusion-color': '#aaa',
+      // use an 'interpolate' expression to add a smooth transition effect to the
+      // buildings as the user zooms in
+      'fill-extrusion-height': [
+        "interpolate", ["linear"], ["zoom"],
+        15, 0,
+        15.05, ["get", "height"]
+      ],
+      'fill-extrusion-base': [
+        "interpolate", ["linear"], ["zoom"],
+        15, 0,
+        15.05, ["get", "min_height"]
+      ],
+      'fill-extrusion-opacity': .6
+    }
+  }
 
   const getResults = ({ result }) => {
     console.log({ result });
@@ -80,9 +136,6 @@ const MessageBar = () => {
 
   const handleSendMessage = async () => {
     
-    // assignTimeDate()
-    
-    // Check if location has valid data
     if (selectedChatType === "contact") {
       socket.emit("sendMessage", {
         sender: userInfo.id,
@@ -97,10 +150,9 @@ const MessageBar = () => {
         endTime: endTime,
       });
     }
-
-    // Reset location after sending
-    setLocation(null); // Set to `null` instead of an empty object
-    setMessage(""); // Clear the message input as well if needed
+    // Reset location and message bar after sending
+    setLocation(null);
+    setMessage("");
   };
 
   return (
@@ -128,7 +180,7 @@ const MessageBar = () => {
             open={locationPickerOpen}
             onOpenChange={setLocationPickerOpen}
           >
-            <DialogContent className="bg-[#181920] border-none text-white w-[400px] h-[400px] flex flex-col">
+            <DialogContent className="bg-[#181920] border-none text-white w-[600px] h-[600px] flex flex-col">
               <DialogHeader>
                 <DialogTitle>Add a Location</DialogTitle>
                 <DialogDescription>
@@ -137,23 +189,37 @@ const MessageBar = () => {
               </DialogHeader>
               <Map
                 initialViewState={{
-                  longitude: -79.4512,
-                  latitude: 43.6568,
-                  zoom: 13,
+                  longitude: 68.2605725,
+                  latitude: 25.4080005,
+                  zoom: 16,
+                  pitch: 60,
+                  antialias: true
                 }}
                 
-                mapStyle="mapbox://styles/mapbox/streets-v9"
-                mapboxAccessToken={
-                  "pk.eyJ1IjoidW1hcmRhcjgiLCJhIjoiY2tic3VlczlyMDNuMDJycnE0eWxibDVsZSJ9.NaBkb4_2kJoSMVUp27W51w"
-                }
+                mapStyle="mapbox://styles/mapbox/outdoors-v12"
+                mapboxAccessToken={"pk.eyJ1IjoidW1hcmRhcjgiLCJhIjoiY2tic3VlczlyMDNuMDJycnE0eWxibDVsZSJ9.NaBkb4_2kJoSMVUp27W51w"}                
+
+                // mapStyle="mapbox://styles/mapbox/streets-v9"
+                // mapStyle="mapbox://styles/mapbox/satellite-v9"
+                // mapStyle="mapbox://styles/mapbox/light-v9"
+                maxPitch={85}
+                // terrain={{source: 'mapbox-dem', exaggeration: 1.5}}
               >
                 <GeocoderControl
-                  mapboxAccessToken={
-                    "pk.eyJ1IjoidW1hcmRhcjgiLCJhIjoiY2tic3VlczlyMDNuMDJycnE0eWxibDVsZSJ9.NaBkb4_2kJoSMVUp27W51w"
-                  }
+                  mapboxAccessToken={"pk.eyJ1IjoidW1hcmRhcjgiLCJhIjoiY2tic3VlczlyMDNuMDJycnE0eWxibDVsZSJ9.NaBkb4_2kJoSMVUp27W51w"}                  
                   position="top-left"
                   onResult={getResults}
                 />
+
+                <Layer {...threeDLayer} />
+                
+                {/* <Marker>
+                  {`Clicked here`}
+                </Marker> */}
+                
+                {/* {markers.map((m, i) => <Marker {...m} key={i} />)} */}
+
+                {/* <DeckGLOverlay layers={layers} interleaved /> */}
 
               </Map>
               <Button
@@ -168,10 +234,7 @@ const MessageBar = () => {
             </DialogContent>
           </Dialog>
           <Dialog open={timePickerOpen} onOpenChange={setTimePickerOpen}>
-            <DialogContent
-              className="bg-[#181920] border-none text-white 
-                    w-[400px] h-[430px] flex flex-col"
-            >
+            <DialogContent className="bg-[#181920] border-none text-white w-[400px] h-[430px] flex flex-col">
               <DialogHeader>
                 <DialogTitle>Add Time & Expiration</DialogTitle>
                 <DialogDescription>
