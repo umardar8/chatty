@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogContent,
 } from "@/components/ui/dialog";
+import Mapbox from "../mapbox";
 
 const MessageContainer = () => {
   const scrollRef = useRef(null);
@@ -173,14 +174,14 @@ const MessageContainer = () => {
                 <FaClock className="text-green-500" />
                 {`
                     ${moment(message?.startDate).format("ll")} 
-                    ${message?.startTime} 
+                    ${moment(message?.startTime, "HH:mm").format("h:mm A")}
                 `}
               </span>
               <span className="flex gap-2 items-center">
                 <FaClock className="text-red-400" />
                 {`
                     ${moment(message?.endDate).format("ll")}  
-                    ${message?.endTime}
+                    ${moment(message?.endTime, "HH:mm").format("h:mm A")}
                 `}
               </span>
             </div>
@@ -191,21 +192,14 @@ const MessageContainer = () => {
         {moment(message.timestamp).format("LT")}
       </div>
       <Dialog open={showLocation} onOpenChange={setShowLocation}>
-        <DialogContent className="bg-[#181920] border-none text-white w-[400px] h-[400px] flex flex-col">
+        <DialogContent className="bg-[#181920] border-none text-white w-[600px] h-[580px] flex flex-col">
           <DialogHeader>
             <DialogTitle>View AR Component on Location</DialogTitle>
           </DialogHeader>
-          <Map
-            initialViewState={{
-              longitude: message?.location?.longitude,
-              latitude: message?.location?.latitude,
-              zoom: 13,
-            }}
-            mapStyle="mapbox://styles/mapbox/streets-v9"
-            mapboxAccessToken={
-              "pk.eyJ1IjoidW1hcmRhcjgiLCJhIjoiY2tic3VlczlyMDNuMDJycnE0eWxibDVsZSJ9.NaBkb4_2kJoSMVUp27W51w"
-            }
-          ></Map>
+          <Mapbox 
+            longitude={message?.location?.longitude}
+            latitude={message?.location?.latitude}
+          />
         </DialogContent>
       </Dialog>
     </div>
