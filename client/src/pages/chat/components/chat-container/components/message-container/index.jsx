@@ -2,7 +2,6 @@ import { apiClient } from "@/lib/api-client";
 import { useAppStore } from "@/store";
 import { GET_ALL_MESSAGES_ROUTE } from "@/utils/constants";
 import moment from "moment/moment";
-import { Map } from "react-map-gl";
 import { useEffect, useRef, useState } from "react";
 import { FaLocationPinLock } from "react-icons/fa6";
 import { FaClock } from "react-icons/fa";
@@ -16,17 +15,18 @@ import Mapbox from "../mapbox";
 
 const MessageContainer = () => {
   const scrollRef = useRef(null);
-  const currentDate = new Date();
+  const currentDate = moment(new Date()).format("LL");
+  const currentTime = moment(new Date()).format("LT");
+  const [receivedDate, setReceivedDate] = useState("");
+  const [receivedTime, setReceivedTime] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
+  const [expiryTime, setExpiryTime] = useState("");
   const [showLocation, setShowLocation] = useState(false);
-  const arePointsNear = (expectedLocation) => {
-    var dx = currentLocation.currentLatitude - expectedLocation.latitude;
-    var dy = currentLocation.currentLongitude - expectedLocation.longitude;
-    return Math.sqrt(dx * dx + dy * dy) <= 10;
-  };
   const [currentLocation, setCurrentLocation] = useState({
     currentLatitude: null,
     currentLongitude: null,
   });
+
   const {
     selectedChatType,
     selectedChatData,
@@ -54,7 +54,9 @@ const MessageContainer = () => {
       console.log("Unable to retrieve your location");
     }
   }, []);
+
   useEffect(() => {
+
     const getMessages = async () => {
       try {
         const response = await apiClient.post(
@@ -62,18 +64,16 @@ const MessageContainer = () => {
           { id: selectedChatData._id },
           { withCredentials: true }
         );
-
+  
         if (response.data.messages) {
-          setSelectedChatMessages(response.data.messages);
+          setSelectedChatMessages(response.data.messages) 
         }
       } catch (error) {
         console.log(error);
       }
     };
 
-    if (selectedChatData._id) {
-      if (selectedChatType === "contact") getMessages();
-    }
+    if (selectedChatData._id && selectedChatType === "contact") getMessages();
   }, [selectedChatData, selectedChatType, setSelectedChatMessages]);
 
   useEffect(() => {
@@ -81,6 +81,73 @@ const MessageContainer = () => {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [selectedChatMessages]);
+
+  // useEffect(() => {
+
+  //   return (
+
+  //   )
+
+  // }, [])
+
+  const renderLocationMessages = (message) => {
+    const receivedDate = moment(message?.startDate).format("ll");
+    const receivedTime = moment(message?.startTime, "HH:mm").format("h:mm A");
+    const expiryDate = moment(message?.endDate).format("ll");
+    const expiryTime = moment(message?.endTime, "HH:mm").format("h:mm A");
+  
+    const isTimeToDeliver = currentDate > receivedDate || (currentDate >= receivedDate && currentTime >= receivedTime)
+
+    console.log(`receivedDate: ${receivedDate}`)
+    console.log(`receivedTime: ${receivedTime}`)
+    console.log(`expiryDate: ${expiryDate}`)
+    console.log(`expiryTime: ${expiryTime}`)
+    console.log(`currentDate: ${currentDate}`)
+    console.log(`currentTime: ${currentTime}`)
+    console.log(`isTimeToDeliver: ${isTimeToDeliver}`)
+
+    return (
+      <>
+        {message.messageType === "text" && !message.location ? (
+          message.content
+        ) : isTimeToDeliver ? (
+          <>{message.content}</>
+        ) : (
+          <>
+            <p>
+              You have a new message at{" "}
+              <span
+                className="underline cursor-pointer"
+                onClick={() => setShowLocation(true)}
+              >
+                {message?.location?.location}
+              </span>
+            </p>
+          </>
+        )
+        <div
+          className={`
+            ${message.sender === selectedChatData._id ? "items-start" : "items-end"}
+            pt-3 flex flex-col text-[#808080] gap-2 text-xs hover:cursor-pointer hover:underline
+          `}
+        >
+          {isTimeToDeliver ? <span className="flex gap-2 items-center" onClick={() => setShowLocation(true)}>
+            {message?.location?.location} <FaLocationPinLock />
+          </span> : null}
+          <div className="flex gap-4 text-[#808080] text-xs">
+            <span className="flex gap-2 items-center">
+              {`${receivedDate} ${receivedTime}`} <FaClock className="text-green-500" />
+            </span>
+            <span className="flex gap-2 items-center">
+              {`${expiryDate} ${expiryTime}`} <FaClock className="text-red-400" />
+            </span>
+          </div>
+        </div>
+        }
+      </>
+    );
+  };
+  
 
   const renderMessages = () => {
     let lastDate = null;
@@ -110,14 +177,15 @@ const MessageContainer = () => {
             message.sender !== selectedChatData._id
               ? "bg-[#00ccff]/5 text-[#00ccff]/90 border-[#00ccff]/50"
               : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
-          } border inline-block p-4 rounded my-1 max-w-[50%] break-words
+          } border inline-block p-4 rounded my-1 max-w-[75%] break-words
         `}
       >
+        {renderLocationMessages(message)}
 
-        {message.messageType === "text" && message.location === undefined 
+        {/* {message.messageType === "text" && message.location === undefined 
         ? (message.content) 
-        : moment(currentDate).format("LL") >= moment(message?.startDate).format("LL") &&
-          moment(currentDate).format("LT") >= message?.startTime 
+        : currentDate >= moment(message.startDate).format("LL") &&
+        currentTime >= moment(message?.startTime,"HH:mm").format("h:mm A")
           ? (
           <>
             {message.content}
@@ -138,18 +206,18 @@ const MessageContainer = () => {
               `}
             >
               <span className="flex gap-2 items-center">
-                <FaClock className="text-green-500" />
                 {`
                     ${moment(message?.startDate).format("ll")} 
-                    ${message?.startTime} 
+                    ${moment(message?.startTime, "HH:mm").format("h:mm A")}
                   `}
+                  <FaClock className="text-green-500" />
               </span>
               <span className="flex gap-2 items-center">
-                <FaClock className="text-red-400" />
                 {`
                     ${moment(message?.endDate).format("ll")}  
-                    ${message?.endTime}
+                    ${moment(message?.endTime, "HH:mm").format("h:mm A")}
                   `}
+                  <FaClock className="text-red-400" />
               </span>
             </div>
           </>
@@ -186,7 +254,7 @@ const MessageContainer = () => {
               </span>
             </div>
           </div>
-        )}
+        )} */}
       </div>
       <div className="text-xs text-gray-600 ">
         {moment(message.timestamp).format("LT")}

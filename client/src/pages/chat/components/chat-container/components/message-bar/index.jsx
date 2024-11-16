@@ -1,4 +1,5 @@
 import { useSocket } from "@/context/SocketContext";
+import {Marker} from "react-map-gl"
 import { useAppStore } from "@/store";
 import EmojiPicker from "emoji-picker-react";
 import { useEffect, useRef, useState } from "react";
@@ -111,7 +112,11 @@ const MessageBar = () => {
         <div className="relative flex">
           <button
             className="text-neutral-500 focus:border-none focus:outline-none focus:text-white transition-all duration-300"
-            onClick={() => setLocationPickerOpen(true)}
+            onClick={() => {
+              setLocation(null)
+              setLocationPickerOpen(true)
+              }
+            }
           >
             {location && location.longitude && location.latitude ? (
               <FaLocationPinLock className="text-2xl text-[#158b3d]" />
@@ -131,10 +136,20 @@ const MessageBar = () => {
                 </DialogDescription>
               </DialogHeader>
               <Mapbox 
-                location={location}
                 geocoder={true}
                 getResults={getResults}
-              />
+              >
+                {
+                  !location ? (
+                    <Marker
+                      longitude={68.2605725}
+                      latitude={25.4080005}
+                      draggable
+                      anchor="bottom"
+                    ></Marker>
+                  ) : null
+                }
+              </Mapbox>
               <Button
                 className="bg-[#8417ff] px-10 py-2"
                 onClick={() => {

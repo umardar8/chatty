@@ -82,14 +82,6 @@ const Mapbox = (props) => {
         // mapStyle="mapbox://styles/mapbox/light-v9"
         // terrain={{source: 'mapbox-dem', exaggeration: 1.5}}
       >
-        {!props.location ? (
-          <Marker
-            longitude={props.longitude ? props.longitude : 68.2605725}
-            latitude={props.latitude ? props.latitude : 25.4080005}
-            draggable
-            anchor="bottom"
-          ></Marker>
-        ) : null}
 
         {props.geocoder ? (
           <GeocoderControl
