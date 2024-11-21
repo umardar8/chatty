@@ -106,7 +106,7 @@ const Auth = () => {
                             <img src={victory} alt='victory emoji' className='h-[100px]' />
 
                         </div>
-                        <p className='font-medium text-center'>Fill in the details to get started with the best Chat App</p>
+                        <p className='font-medium text-center'>Get started with the MUET Location-Based Messaging and AR App</p>
 
                     </div>
 

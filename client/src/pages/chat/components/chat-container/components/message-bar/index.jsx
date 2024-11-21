@@ -1,5 +1,4 @@
 import { useSocket } from "@/context/SocketContext";
-import {Marker} from "react-map-gl"
 import { useAppStore } from "@/store";
 import EmojiPicker from "emoji-picker-react";
 import { useEffect, useRef, useState } from "react";
@@ -7,27 +6,9 @@ import { IoSend } from "react-icons/io5";
 import { RiEmojiStickerLine } from "react-icons/ri";
 import { MdOutlineAddLocationAlt } from "react-icons/md";
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Separator } from "@/components/ui/separator";
-import { addDays, format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { FaLocationPinLock } from "react-icons/fa6";
-import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
+import moment from "moment/moment";
 import Mapbox from "../mapbox";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogHeader,
@@ -36,21 +17,39 @@ import {
   DialogContent,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import TimePickerDialog from "../time-picker-dialog";
 
 const MessageBar = () => {
+
+  // reference variable for showing emoji box
   const emojiRef = useRef();
+
+  // integration of socket for message sending functionality
   const socket = useSocket();
+  
+  // integration of app store for using data from global variables
   const { userInfo, selectedChatType, selectedChatData } = useAppStore();
+
+  // message's text content
   const [message, setMessage] = useState("");
+
+  // variables for showing emoji modal, location dialog, time dialog respectively
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
   const [timePickerOpen, setTimePickerOpen] = useState(false);
-  const [startDate, setStartDate] = useState();
-  const [startTime, setStartTime] = useState();
-  const [endDate, setEndDate] = useState();
-  const [endTime, setEndTime] = useState();
-  const [location, setLocation] = useState({});
 
+  // variables for storing date and time data to send with message
+  const [startDate, setStartDate] = useState(new Date);
+  const [startTime, setStartTime] = useState(moment(new Date).format("HH:mm"));
+  const [endDate, setEndDate] = useState(new Date);
+  const [endTime, setEndTime] = useState(moment(new Date).format("HH:mm"));
+  
+  // variables for storing location data to send with message
+  const [location, setLocation] = useState({});
+  const [customLocationName, setCustomLocationName] = useState("")
+  const [showCustomName, setShowCustomName] = useState(false)
+
+  // function for showing location result from search
   const getResults = ({ result }) => {
     console.log({ result });
     const data = {
@@ -62,6 +61,7 @@ const MessageBar = () => {
     setLocation(data);
   };
 
+  // open or close emoji modal based on mouse click events
   useEffect(() => {
     function handleClickOutside(event) {
       if (emojiRef.current && !emojiRef.current.contains(event.target)) {
@@ -74,12 +74,21 @@ const MessageBar = () => {
     };
   }, [emojiRef]);
 
+  // function for adding emoji to the message's text content body
   const handleAddEmoji = (emoji) => {
     setMessage((msg) => msg + emoji.emoji);
   };
 
+  // function for sending message data to the socket
   const handleSendMessage = async () => {
+
+    // validate if there is text in message content before sending message
+    if (!message.trim()) {
+      alert("Message text is required!");
+      return;
+    }
     
+    // emit data to sendMessage function in socket
     if (selectedChatType === "contact") {
       socket.emit("sendMessage", {
         sender: userInfo.id,
@@ -92,16 +101,27 @@ const MessageBar = () => {
         startTime: startTime,
         endDate: endDate,
         endTime: endTime,
+        customLocationName: customLocationName,
       });
     }
-    // Reset location and message bar after sending
+
+    // Reset message bar variables after sending message
     setLocation(null);
     setMessage("");
+    setStartDate(null);
+    setStartTime(null);
+    setEndDate(null);
+    setEndTime(null);
+    setShowCustomName(false);
+    setCustomLocationName("");
   };
 
   return (
+
+    // message bar structure and styling
     <div className="h-[10vh] bg-[#1c1d25] flex justify-center items-center px-8 mb-6 gap-6 ">
       <div className="flex-1 flex bg-[#2a2b33] rounded-md items-center gap-5 pr-5">
+        {/* input field for entering text message content */}
         <input
           type="text"
           className="flex-1 p-5 bg-transparent rounded-md focus:border-none focus:outline-none"
@@ -110,6 +130,7 @@ const MessageBar = () => {
           onChange={(e) => setMessage(e.target.value)}
         />
         <div className="relative flex">
+          {/* button for adding location to the message */}
           <button
             className="text-neutral-500 focus:border-none focus:outline-none focus:text-white transition-all duration-300"
             onClick={() => {
@@ -124,11 +145,13 @@ const MessageBar = () => {
               <MdOutlineAddLocationAlt className="text-3xl" />
             )}
           </button>
+
+          {/* dialog for selecting location on map */}
           <Dialog
             open={locationPickerOpen}
             onOpenChange={setLocationPickerOpen}
           >
-            <DialogContent className="bg-[#181920] border-none text-white w-[600px] h-[580px] flex flex-col">
+            <DialogContent className="bg-[#181920] border-none text-white w-[500px] h-[550px] flex flex-col">
               <DialogHeader>
                 <DialogTitle>Add a Location</DialogTitle>
                 <DialogDescription>
@@ -138,18 +161,17 @@ const MessageBar = () => {
               <Mapbox 
                 geocoder={true}
                 getResults={getResults}
-              >
-                {
-                  !location ? (
-                    <Marker
-                      longitude={68.2605725}
-                      latitude={25.4080005}
-                      draggable
-                      anchor="bottom"
-                    ></Marker>
-                  ) : null
-                }
-              </Mapbox>
+                setShowCustomName={setShowCustomName}
+              />
+              {showCustomName ? 
+                (<input 
+                  className="text-black border-0 rounded-none p-2"
+                  type="text"
+                  placeholder="add custom location name"
+                  value={customLocationName}
+                  onChange={(e) => setCustomLocationName(e.target.value)}
+                />) : null
+              }
               <Button
                 className="bg-[#8417ff] px-10 py-2"
                 onClick={() => {
@@ -161,157 +183,23 @@ const MessageBar = () => {
               </Button>
             </DialogContent>
           </Dialog>
-          <Dialog open={timePickerOpen} onOpenChange={setTimePickerOpen}>
-            <DialogContent className="bg-[#181920] border-none text-white w-[400px] h-[430px] flex flex-col">
-              <DialogHeader>
-                <DialogTitle>Add Time & Expiration</DialogTitle>
-                <DialogDescription>
-                  What time works best to deliver this message?
-                </DialogDescription>
-                <Separator />
-              </DialogHeader>
-              <div className="flex gap-5 flex-col">
-                <h3>Select Time to Deliver Message.</h3>
-                <div className="flex gap-2">
-                  {/* start Date */}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"secondary"}
-                        className={cn(
-                          "w-[280px] justify-start text-left font-normal",
-                          !startDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon />
-                        {startDate ? (
-                          format(startDate, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
-                      <Select
-                        onValueChange={(value) =>
-                          setStartDate(addDays(new Date(), parseInt(value)))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent position="popper">
-                          <SelectItem value="0">Today</SelectItem>
-                          <SelectItem value="1">Tomorrow</SelectItem>
-                          <SelectItem value="3">In 3 days</SelectItem>
-                          <SelectItem value="7">In a week</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <div className="rounded-md border">
-                        <Calendar
-                          mode="single"
-                          selected={startDate}
-                          onSelect={setStartDate}
-                        />
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  <input
-                    type="time"
-                    className="bg-white text-black rounded-lg px-2"
-                    onChange={(e) => {
-                      setStartTime(e.target.value);
-                    }}
-                  />
-                </div>
-                <h3>Select Time for Message to Expire.</h3>
-                <div className="flex gap-2">
-                  {/* End Date */}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"secondary"}
-                        className={cn(
-                          "w-[280px] justify-start text-left font-normal",
-                          !endDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon />
-                        {endDate ? (
-                          format(endDate, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
-                      <Select
-                        onValueChange={(value) =>
-                          setEndDate(addDays(new Date(), parseInt(value)))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent position="popper">
-                          <SelectItem value="0">Today</SelectItem>
-                          <SelectItem value="1">Tomorrow</SelectItem>
-                          <SelectItem value="3">In 3 days</SelectItem>
-                          <SelectItem value="7">In a week</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <div className="rounded-md border">
-                        <Calendar
-                          mode="single"
-                          selected={endDate}
-                          onSelect={setEndDate}
-                        />
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  <input
-                    type="time"
-                    className="bg-white text-black rounded-lg px-2"
-                    onChange={(e) => setEndTime(e.target.value)}
-                  />
-                </div>
-                <Separator />
-                <RadioGroup defaultValue="option-one" className="flex">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      value="option-one"
-                      id="option-one"
-                      className="bg-[#ffffff]"
-                    />
-                    <Label htmlFor="option-one">Request</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      value="option-two"
-                      id="option-two"
-                      className="bg-[#ffffff]"
-                    />
-                    <Label htmlFor="option-two">Review</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      value="option-three"
-                      id="option-three"
-                      className="bg-[#ffffff]"
-                    />
-                    <Label htmlFor="option-two">Suggestion</Label>
-                  </div>
-                </RadioGroup>
-                <Button
-                  className="bg-[#8417ff] px-10 py-2"
-                  onClick={() => setTimePickerOpen(false)}
-                >
-                  Add to Message
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+
+          {/* dialog for adding time and date to the message */}
+          <TimePickerDialog
+            open={timePickerOpen}
+            onClose={() => setTimePickerOpen(false)}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            startTime={startTime}
+            setStartTime={setStartTime}
+            endTime={endTime}
+            setEndTime={setEndTime}
+          />
         </div>
+
+        {/* emoji picker button and component */}
         <div className="relative flex">
           <button
             className="text-neutral-500 focus:border-none focus:outline-none focus:text-white transition-all duration-300"
@@ -329,6 +217,8 @@ const MessageBar = () => {
           </div>
         </div>
       </div>
+
+      {/* button for sending message */}
       <button
         className="bg-[#8417ff] rounded-md flex items-center justify-center p-5 focus:border-none hover:bg-[#741bda] focus:outline-none focus:text-white transition-all duration-300"
         onClick={handleSendMessage}

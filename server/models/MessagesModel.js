@@ -50,6 +50,10 @@ const messageSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    customLocationName: {
+        type: String,
+        required: false
+    },
 })
 
 const Message = mongoose.model("Messages", messageSchema)
