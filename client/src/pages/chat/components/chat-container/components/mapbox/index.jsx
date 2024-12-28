@@ -100,23 +100,22 @@ const Mapbox = (props) => {
           />
         ) : null}
 
-        {/* {props.showMarker ? (
+        {props.showMarker ? (
           <Marker 
             longitude={props.longitude ? props.longitude : 68.2605725}
             latitude={props.latitude ? props.latitude : 25.4080005}
-            draggable
             anchor="bottom"
-            onClick={e => {
-            // If we let the click event propagates to the map, it will immediately close the popup
-            // with `closeOnClick: true`
-            e.originalEvent.stopPropagation();
-            setPopupInfo({
-              lng: props.longitude ? props.longitude :"68.2605725",
-              lat: props.latitude ? props.latitude : "25.4080005"
-            });
-          }}
+            // onClick={e => {
+            //   // If we let the click event propagates to the map, it will immediately close the popup
+            //   // with `closeOnClick: true`
+            //   e.originalEvent.stopPropagation();
+            //   setPopupInfo({
+            //     lng: props.longitude ? props.longitude :"68.2605725",
+            //     lat: props.latitude ? props.latitude : "25.4080005"
+            //   });
+            // }}
           />
-        ) : null} */}
+        ) : null}
 
         <Layer {...threeDLayer} />
 

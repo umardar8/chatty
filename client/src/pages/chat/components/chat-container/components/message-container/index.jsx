@@ -282,6 +282,7 @@ const MessageContainer = () => {
             <Mapbox
               longitude={message?.location?.longitude}
               latitude={message?.location?.latitude}
+              showMarker={true}
             />
           </DialogContent>
         </Dialog>

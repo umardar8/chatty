@@ -18,7 +18,7 @@ const databaseURL = process.env.DATABASE_URL; // uri of database on mongoDB Atla
 // using cors to enable interaction of multiple servers
 app.use(
     cors({
-        origin: [process.env.ORIGIN],
+        origin: process.env.ORIGIN,
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
         credentials: true
     })
