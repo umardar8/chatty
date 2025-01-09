@@ -3,8 +3,11 @@ import { useAppStore } from "@/store";
 import { GET_ALL_MESSAGES_ROUTE } from "@/utils/constants";
 import moment from "moment/moment";
 import { useEffect, useRef, useState } from "react";
-import { FaLocationPinLock } from "react-icons/fa6";
-import { FaClock } from "react-icons/fa";
+import { FaLocationPinLock, FaHourglassEnd, FaHourglassStart } from "react-icons/fa6";
+import { PiCodesandboxLogoFill } from "react-icons/pi";
+import 'aframe';
+import 'ar.js';
+import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogHeader,
@@ -24,6 +27,7 @@ const MessageContainer = () => {
 
   // boolean for showing message location dialog
   const [showLocation, setShowLocation] = useState(false);
+  const [showAR, setShowAR] = useState(false)
 
   // variable for storing user's current location
   const [currentLocation, setCurrentLocation] = useState({
@@ -242,25 +246,34 @@ const MessageContainer = () => {
                   `}
                 >
                   {/* show location name */}
+                  <Separator className=" bg-gray-600" />
                   {isTimeToDeliver ? (
-                    <span
-                      className="flex gap-2 items-center hover:cursor-pointer hover:underline"
-                      onClick={() => setShowLocation(true)}
-                    >
-                      {message?.customLocationName}{" "}
-                      {message?.location?.location} <FaLocationPinLock />
-                    </span>
+                    <div className="flex gap-4">
+                      <span
+                        className="flex gap-2 items-center hover:cursor-pointer hover:underline"
+                        onClick={() => setShowAR(true)}
+                      >
+                        Show AR <PiCodesandboxLogoFill />
+                      </span>
+                      <span
+                        className="flex gap-2 items-center hover:cursor-pointer hover:underline"
+                        onClick={() => setShowLocation(true)}
+                      >
+                        {message?.customLocationName}{" "}
+                        {message?.location?.location} <FaLocationPinLock />
+                      </span>
+                    </div>
                   ) : null}
                   <div className="flex gap-4 text-[#808080] text-xs">
                     {/* show message receiving time */}
                     <span className="flex gap-2 items-center">
                       {`${receivedDate} ${receivedTime}`}{" "}
-                      <FaClock className="text-green-500" />
+                      <FaHourglassStart />
                     </span>
                     {/* show message expiration time */}
                     <span className="flex gap-2 items-center">
                       {`${expiryDate} ${expiryTime}`}{" "}
-                      <FaClock className="text-red-400" />
+                      <FaHourglassEnd />
                     </span>
                   </div>
                 </div>
@@ -284,6 +297,29 @@ const MessageContainer = () => {
               latitude={message?.location?.latitude}
               showMarker={true}
             />
+          </DialogContent>
+        </Dialog>
+
+        {/* show AR component in realtime camera feedback within a dialog */}
+        <Dialog open={showAR} onOpenChange={setShowAR}>
+          <DialogContent className="bg-[#181920] border-none text-white w-[600px] h-[580px] flex flex-col">
+            <DialogHeader>
+              <DialogTitle>View AR Component on Location</DialogTitle>
+            </DialogHeader>
+            <a-scene
+              vr-mode-ui="enabled: false"
+              embedded
+              arjs="sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960; debugUIEnabled: false;"
+            >
+              <a-camera gps-camera rotation-reader></a-camera>
+              <a-entity
+                gltf-model="/client/src/assets/scene.gltf"
+                rotation="0 180 0"
+                scale="0.15 0.15 0.15"
+                gps-entity-place="latitude: 25.404841; longitude: 68.260988;"
+                animation-mixer
+              ></a-entity>
+            </a-scene>
           </DialogContent>
         </Dialog>
       </div>

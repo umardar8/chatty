@@ -4,12 +4,13 @@ import { defineConfig } from "vite"
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    host: true, // Enable network IP access
+    // https: true, // Serve over HTTPS
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  server: {
-    host: 'http://127.0.0.1:8747'
-  }
 })
