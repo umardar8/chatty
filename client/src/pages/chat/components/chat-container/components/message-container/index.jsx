@@ -5,8 +5,6 @@ import moment from "moment/moment";
 import { useEffect, useRef, useState } from "react";
 import { FaLocationPinLock, FaHourglassEnd, FaHourglassStart } from "react-icons/fa6";
 import { PiCodesandboxLogoFill } from "react-icons/pi";
-import 'aframe';
-import 'ar.js';
 import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
@@ -304,22 +302,10 @@ const MessageContainer = () => {
         <Dialog open={showAR} onOpenChange={setShowAR}>
           <DialogContent className="bg-[#181920] border-none text-white w-[600px] h-[580px] flex flex-col">
             <DialogHeader>
-              <DialogTitle>View AR Component on Location</DialogTitle>
+              <DialogTitle>Open Augmented Reality View</DialogTitle>
             </DialogHeader>
-            <a-scene
-              vr-mode-ui="enabled: false"
-              embedded
-              arjs="sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960; debugUIEnabled: false;"
-            >
-              <a-camera gps-camera rotation-reader></a-camera>
-              <a-entity
-                gltf-model="/client/src/assets/scene.gltf"
-                rotation="0 180 0"
-                scale="0.15 0.15 0.15"
-                gps-entity-place="latitude: 25.404841; longitude: 68.260988;"
-                animation-mixer
-              ></a-entity>
-            </a-scene>
+            <h3>Enter Latitude: {receivedLatitude}</h3>
+            <h3>Enter Longitude: {receivedLongitude}</h3>
           </DialogContent>
         </Dialog>
       </div>
