@@ -251,7 +251,9 @@ const MessageContainer = () => {
                         className="flex gap-2 items-center hover:cursor-pointer hover:underline"
                         onClick={() => setShowAR(true)}
                       >
-                        Show AR <PiCodesandboxLogoFill />
+                        <a href="https://umardar8.github.io/chatty-ar" target="_blank">
+                          Show AR <PiCodesandboxLogoFill />
+                        </a>
                       </span>
                       <span
                         className="flex gap-2 items-center hover:cursor-pointer hover:underline"
