@@ -6,6 +6,7 @@ import Chat from './pages/chat';
 import { useAppStore } from './store';
 import { apiClient } from './lib/api-client';
 import { GET_USER_INFO } from './utils/constants';
+import axios from 'axios';
 
 const PrivateRoute = ({children}) => {
   const {userInfo} = useAppStore();
@@ -23,6 +24,8 @@ const App = () => {
 
   const { userInfo, setUserInfo } = useAppStore();
   const [loading, setLoading] = useState(true);
+
+  axios.defaults.withCredentials = true;
 
   useEffect(()=>{
       const getUserData = async () => {
