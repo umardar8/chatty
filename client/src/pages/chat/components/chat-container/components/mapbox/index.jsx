@@ -78,7 +78,7 @@ const Mapbox = (props) => {
         }}
 
         mapStyle="mapbox://styles/mapbox/outdoors-v12"
-        mapboxAccessToken={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}
+        mapboxAccessToken="pk.eyJ1IjoidW1hcmRhcjgiLCJhIjoiY2tic3VlczlyMDNuMDJycnE0eWxibDVsZSJ9.NaBkb4_2kJoSMVUp27W51w"
         maxPitch={80}
 
         // mapStyle="mapbox://styles/mapbox/streets-v9"
@@ -89,7 +89,7 @@ const Mapbox = (props) => {
 
         {props.geocoder ? (
           <GeocoderControl
-            mapboxAccessToken={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}
+            mapboxAccessToken="pk.eyJ1IjoidW1hcmRhcjgiLCJhIjoiY2tic3VlczlyMDNuMDJycnE0eWxibDVsZSJ9.NaBkb4_2kJoSMVUp27W51w"
             position="top-left"
             onLoading={() => console.log("Loading...")}
             onResults={(results) => console.log("Results:", results)}
