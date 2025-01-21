@@ -12,8 +12,8 @@ import messagesRoutes from "./routes/MessagesRoutes.js";
 dotenv.config();
 
 const app = express();  // using express for backend server
-const port = process.env.PORT || 3001 // port for server
-const databaseURL = process.env.DATABASE_URL; // uri of database on mongoDB Atlas
+const port = 8748 || 3001 // port for server
+const databaseURL = "mongodb+srv://admin:Redrose27@chattydb.c5bv0.mongodb.net/?retryWrites=true&w=majority&appName=ChattyDB"; // uri of database on mongoDB Atlas
 
 // using cors to enable interaction of multiple servers
 app.use(

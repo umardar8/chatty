@@ -6,7 +6,7 @@ import { renameSync, unlinkSync } from "fs";
 const maxAge = 3*24*60*1000;
 
 const createToken = (email, userId) => {
-    return jwt.sign({email, userId}, process.env.JWT_KEY, { expiresIn: maxAge})
+    return jwt.sign({email, userId}, "jkhq2jkh31kle1ehi2h@ihiadh2345", { expiresIn: maxAge})
 }
 
 export const signup = async (request, response, next) => {
