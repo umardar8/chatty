@@ -18,7 +18,7 @@ const databaseURL = process.env.DATABASE_URL; // uri of database on mongoDB Atla
 // using cors to enable interaction of multiple servers
 app.use(
     cors({
-        origin: ["https://chatty-client-78666.vercel.app"],
+        origin: "https://chatty-client-78666.vercel.app",
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
         credentials: true
     })
