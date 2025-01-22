@@ -25,12 +25,12 @@ const App = () => {
   const { userInfo, setUserInfo } = useAppStore();
   const [loading, setLoading] = useState(true);
 
-  axios.defaults.withCredentials = true;
+  // axios.defaults.withCredentials = true;
 
   useEffect(()=>{
       const getUserData = async () => {
         try {
-          const response = await apiClient.get(GET_USER_INFO, {withCredentials:true});
+          const response = await apiClient.get(GET_USER_INFO, {withCredentials:false});
           if (response.status === 200 && response.data.id) {
             setUserInfo(response.data)
           } else {
