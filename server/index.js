@@ -17,7 +17,7 @@ const databaseURL = process.env.DATABASE_URL;
 // using cors to enable interaction of multiple servers
 app.use(
     cors({
-        origin: '*',
+        origin: 'https://chatty-muet.vercel.app',
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
         credentials: true
     })
