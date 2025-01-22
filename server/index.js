@@ -12,7 +12,7 @@ import messagesRoutes from "./routes/MessagesRoutes.js";
 dotenv.config();
 
 const app = express();  // using express for backend server
-const port = process.env.PORT || 3001 // port for server
+
 const databaseURL = process.env.DATABASE_URL;
 
 // using cors to enable interaction of multiple servers
@@ -24,24 +24,18 @@ app.use(
     })
 );
 
-
-
 app.use(cookieParser()); // using cookieParser to access cookies for user auth
 app.use(express.json()); // converting express server payload body to json format
 
 app.use("/api/auth", authRoutes);
-app.use("/api/contacts", contactsRoutes)
-app.use("/api/messages", messagesRoutes)
-app.use("/uploads/profiles", express.static("uploads/profiles"))
+app.use("/api/contacts", contactsRoutes);
+app.use("/api/messages", messagesRoutes);
+app.use("/uploads/profiles", express.static("uploads/profiles"));
 
-// starting express server for backend
-const server = app.listen(port, ()=>{
-    console.log(`Server is running at http://localhost:${port}`)
-});
-
-setupSocket(server)
-
-// connecting to mongoDB Atlas server for database
+// Connecting to mongoDB Atlas server for database
 mongoose.connect(databaseURL, {})
-    .then(() => console.log("database connected"))
-    .catch(err=>console.log(err.message));
+    .then(() => console.log("Database connected"))
+    .catch(err => console.log(err.message));
+
+// The Vercel function should be exported and not listen on a port
+export default app;
