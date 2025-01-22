@@ -19,7 +19,7 @@ app.use(
     cors({
         origin: 'https://chatty-muet.vercel.app',
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-        credentials: true
+        credentials: false
     })
 );
 
