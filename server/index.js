@@ -12,13 +12,13 @@ import messagesRoutes from "./routes/MessagesRoutes.js";
 dotenv.config();
 
 const app = express();  // using express for backend server
-const port = 8748 || 3001 // port for server
-const databaseURL = "mongodb+srv://admin:Redrose27@chattydb.c5bv0.mongodb.net/?retryWrites=true&w=majority&appName=ChattyDB"; // uri of database on mongoDB Atlas
+const port = process.env.PORT || 3001 // port for server
+const databaseURL = process.env.DATABASE_URL;
 
 // using cors to enable interaction of multiple servers
 app.use(
     cors({
-        origin: ["https://chatty-client-78666.vercel.app"],
+        origin: process.env.ORIGIN,
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
         credentials: true
     })
