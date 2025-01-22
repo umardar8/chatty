@@ -18,7 +18,7 @@ const databaseURL = "mongodb+srv://admin:Redrose27@chattydb.c5bv0.mongodb.net/?r
 // using cors to enable interaction of multiple servers
 app.use(
     cors({
-        origin: "https://chatty-client-78666.vercel.app",
+        origin: ["https://chatty-client-78666.vercel.app"],
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
         credentials: true
     })
