@@ -5,7 +5,7 @@ const setupSocket = (server) => {
 
     const io = new SocketIoServer(server, {
         cors: {
-            origin: 'https://chatty-muet-app.vercel.app',
+            origin: '*',
             methods: ["GET", "POST"],
             credentials: true
         }
