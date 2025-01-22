@@ -19,3 +19,4 @@ server/.env
 server/*.env
 server/.env.local
 server/.env.*.local
+server/node_modules/.bin/color-support.cmd
