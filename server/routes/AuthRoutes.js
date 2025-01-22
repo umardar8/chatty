@@ -1,10 +1,8 @@
 import {Router} from "express";
 import { signup, login, getUserInfo, updateProfile, addProfileImage, removeProfileImage, logout } from "../controllers/AuthController.js";
 import { verifyToken } from "../middlewares/AuthMiddleware.js";
-import multer from "multer";
 
 const authRoutes = Router();
-const upload = multer({dest: "uploads/profiles/"});
 
 authRoutes.post("/signup", signup);
 authRoutes.post("/login", login);
