@@ -16,7 +16,7 @@ export const SocketProvider = ({children}) => {
     useEffect(()=> {
         if(userInfo) {
             socket.current = io('https://chatty-muet-app.vercel.app', {
-                withCredentials: false,
+                withCredentials: true,
                 query: {userId: userInfo.id}
             })
 

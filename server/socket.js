@@ -6,7 +6,7 @@ const setupSocket = (server) => {
     cors: {
       origin: 'https://chatty-muet.vercel.app',  // Allow requests from this origin
       methods: ['GET', 'POST'],
-      credentials: false, // Allow credentials (cookies) to be included in requests
+      credentials: true, // Allow credentials (cookies) to be included in requests
     },
   });
 
