@@ -251,9 +251,7 @@ const MessageContainer = () => {
                         className="flex gap-2 items-center hover:cursor-pointer hover:underline"
                         onClick={() => setShowAR(true)}
                       >
-                        <a href="https://umardar8.github.io/chatty-ar" target="_blank">
-                          Show AR <PiCodesandboxLogoFill />
-                        </a>
+                        Show AR <PiCodesandboxLogoFill />
                       </span>
                       <span
                         className="flex gap-2 items-center hover:cursor-pointer hover:underline"
@@ -306,8 +304,21 @@ const MessageContainer = () => {
             <DialogHeader>
               <DialogTitle>Open Augmented Reality View</DialogTitle>
             </DialogHeader>
-            <h3>Enter Latitude: {receivedLatitude}</h3>
-            <h3>Enter Longitude: {receivedLongitude}</h3>
+            <a-scene
+              vr-mode-ui="enabled: false"
+              embedded
+              arjs="sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960; debugUIEnabled: false;"
+            >
+              <a-camera gps-camera rotation-reader></a-camera>
+              <a-entity
+                id="marker"
+                gltf-model="../../../../../../assets/scene.gltf"
+                rotation="0 180 0"
+                scale="0.15 0.15 0.15"
+                gps-entity-place={`latitude: ${receivedLatitude}; longitude: ${receivedLongitude};`}
+                animation-mixer
+              ></a-entity>
+            </a-scene>
           </DialogContent>
         </Dialog>
       </div>
