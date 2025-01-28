@@ -169,6 +169,7 @@ const MessageContainer = () => {
   
         if (response.ok) {
           alert("Location data sent successfully!");
+          window.open('https://umardar8.github.io/chatty-ar', '_blank')
         } else {
           alert("Failed to send location data.");
         }
