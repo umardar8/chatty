@@ -154,6 +154,29 @@ const MessageContainer = () => {
     const receivedLatitude = message?.location?.latitude;
     const receivedLongitude = message?.location?.longitude;
 
+    const handleAR = async (e) => {
+      e.preventDefault();
+  
+      const locationData = { receivedLatitude, receivedLongitude };
+  
+      try {
+        // Replace with your API endpoint
+        const response = await fetch("http://147.93.63.6/set-location", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(locationData),
+        });
+  
+        if (response.ok) {
+          alert("Location data sent successfully!");
+        } else {
+          alert("Failed to send location data.");
+        }
+      } catch (error) {
+        console.error("Error sending location:", error);
+      }
+    };
+
     // condition 1 for showing message content
     const isWithinLocation =
       haversineDistance(
@@ -249,7 +272,7 @@ const MessageContainer = () => {
                     <div className="flex gap-4">
                       <span
                         className="flex gap-2 items-center hover:cursor-pointer hover:underline"
-                        onClick={() => setShowAR(true)}
+                        onClick={handleAR}
                       >
                         Show AR <PiCodesandboxLogoFill />
                       </span>
@@ -299,7 +322,7 @@ const MessageContainer = () => {
         </Dialog>
 
         {/* show AR component in realtime camera feedback within a dialog */}
-        <Dialog open={showAR} onOpenChange={setShowAR}>
+        {/* <Dialog open={showAR} onOpenChange={setShowAR}>
           <DialogContent className="bg-[#181920] border-none text-white w-[600px] h-[580px] flex flex-col">
             <DialogHeader>
               <DialogTitle>Open Augmented Reality View</DialogTitle>
@@ -320,7 +343,7 @@ const MessageContainer = () => {
               ></a-entity>
             </a-scene>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
       </div>
     );
   };

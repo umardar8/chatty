@@ -24,6 +24,23 @@ app.use(
     })
 );
 
+let locationData = { latitude: 0, longitude: 0 };
+
+app.post("/set-location", (req, res) => {
+    const { latitude, longitude } = req.body;
+    if (latitude && longitude) {
+      locationData = { latitude, longitude };
+      res.status(200).send({ message: "Location updated successfully." });
+    } else {
+      res.status(400).send({ error: "Invalid location data." });
+    }
+});
+
+app.get("/get-location", (req, res) => {
+    res.status(200).send(locationData);
+});
+
+
 app.use("/uploads/profiles", express.static("uploads/profiles"))
 
 app.use(cookieParser()); // using cookieParser to access cookies for user auth
@@ -35,7 +52,7 @@ app.use("/api/messages", messagesRoutes)
 
 // starting express server for backend
 const server = app.listen(port, ()=>{
-    console.log(`Server is running at http://localhost:${port}`)
+    console.log(`Server is running at ${process.env.ORIGIN}:${port}`)
 });
 
 setupSocket(server)

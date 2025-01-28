@@ -5,8 +5,8 @@ import { defineConfig } from "vite"
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: true, // Enable network IP access
-    // https: true, // Serve over HTTPS
+    // Make sure the server is accessible over the local network
+    host: true,
   },
   resolve: {
     alias: {
