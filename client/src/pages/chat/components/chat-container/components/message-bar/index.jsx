@@ -45,7 +45,7 @@ const MessageBar = () => {
   const [endTime, setEndTime] = useState(moment(new Date).format("HH:mm"));
   
   // variables for storing location data to send with message
-  const [location, setLocation] = useState({});
+  const [location, setLocation] = useState();
   const [customLocationName, setCustomLocationName] = useState("")
   const [showCustomName, setShowCustomName] = useState(false)
 
@@ -108,10 +108,6 @@ const MessageBar = () => {
     // Reset message bar variables after sending message
     setLocation(null);
     setMessage("");
-    setStartDate(null);
-    setStartTime(null);
-    setEndDate(null);
-    setEndTime(null);
     setShowCustomName(false);
     setCustomLocationName("");
   };
@@ -133,13 +129,10 @@ const MessageBar = () => {
           {/* button for adding location to the message */}
           <button
             className="text-neutral-500 focus:border-none focus:outline-none focus:text-white transition-all duration-300"
-            onClick={() => {
-              setLocation(null)
-              setLocationPickerOpen(true)
-              }
-            }
+            onClick={() => setLocationPickerOpen(true) }
           >
-            {location && location.longitude && location.latitude ? (
+            {location ? (
+              console.log("location:", location),
               <FaLocationPinLock className="text-2xl text-[#158b3d]" />
             ) : (
               <MdOutlineAddLocationAlt className="text-3xl" />

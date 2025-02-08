@@ -28,10 +28,7 @@ const MessageContainer = () => {
   const [showAR, setShowAR] = useState(false)
 
   // variable for storing user's current location
-  const [currentLocation, setCurrentLocation] = useState({
-    currentLatitude: null,
-    currentLongitude: null,
-  });
+  const [currentLocation, setCurrentLocation] = useState({});
 
   // function for calculating if the user's current location is near to the received location of message
   function haversineDistance(lat1, lon1, lat2, lon2) {
@@ -92,24 +89,40 @@ const MessageContainer = () => {
 
   // updating user's current location on page load 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(success, error);
-    } else {
-      console.log("Geolocation not supported");
-    }
+    const getLocation = async () => {  // Make the geolocation logic async
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise((resolve, reject) => { // Use a Promise
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
 
-    function success(position) {
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
-      setCurrentLocation({
-        currentLatitude: latitude,
-        currentLongitude: longitude,
-      });
-    }
+          setCurrentLocation({
+            currentLatitude: position.coords.latitude,
+            currentLongitude: position.coords.longitude,
+            loading: false,
+            error: null,
+          });
+        } catch (error) {
+          setCurrentLocation({
+            currentLatitude: null,
+            currentLongitude: null,
+            loading: false,
+            error: error.message, // Store the error message
+          });
+          console.error("Error getting location:", error.message); // Log the error
+        }
+      } else {
+        setCurrentLocation({
+          currentLatitude: null,
+          currentLongitude: null,
+          loading: false,
+          error: "Geolocation not supported",
+        });
+        console.log("Geolocation not supported");
+      }
+    };
 
-    function error() {
-      console.log("Unable to retrieve your location");
-    }
+    getLocation(); // Call the async function
   }, []);
 
   // fetch chat messages
@@ -154,16 +167,15 @@ const MessageContainer = () => {
     const receivedLatitude = message?.location?.latitude;
     const receivedLongitude = message?.location?.longitude;
 
+    const arJsUrl = `https://umardar8.github.io/chatty-ar/?latitude=${receivedLatitude}&longitude=${receivedLongitude}`;
+
     // condition 1 for showing message content
-    const isWithinLocation =
-      haversineDistance(
-        currentLocation.currentLatitude,
-        currentLocation.currentLongitude,
-        receivedLatitude,
-        receivedLongitude
-      ) <= 5
-        ? true
-        : false;
+    const isWithinLocation = currentLocation.currentLatitude && currentLocation.currentLongitude && haversineDistance(
+      currentLocation.currentLatitude,
+      currentLocation.currentLongitude,
+      receivedLatitude,
+      receivedLongitude
+  ) <= 50;
 
     // condition 2 for showing message content
     const isTimeToDeliver =
@@ -249,7 +261,7 @@ const MessageContainer = () => {
                     <div className="flex gap-4">
                       <span
                         className="flex gap-2 items-center hover:cursor-pointer hover:underline"
-                        onClick={() => setShowAR(true)}
+                        onClick={() => window.open(arJsUrl, '_blank')}
                       >
                         Show AR <PiCodesandboxLogoFill />
                       </span>

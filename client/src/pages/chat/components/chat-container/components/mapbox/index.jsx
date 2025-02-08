@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Map, Layer, Marker, Popup } from "react-map-gl";
 import GeocoderControl from "../geocoder-control";
 // import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
@@ -33,7 +33,9 @@ const Mapbox = (props) => {
   //   }
   // };
 
+  const [marker, setMarker] = useState(null);
   const [popupInfo, setPopupInfo] = useState(null);
+  const mapRef = useRef(null);
 
   const threeDLayer = {
     id: "3d-buildings",
@@ -66,20 +68,62 @@ const Mapbox = (props) => {
     },
   };
 
+  const handleMapClick = (event) => {
+    const { lngLat } = event;
+    setMarker({ longitude: lngLat.lng, latitude: lngLat.lat });
+  };
+
+  const handleMarkerDragEnd = (event) => {
+    const { lngLat } = event;
+    setMarker({ longitude: lngLat.lng, latitude: lngLat.lat });
+    // Optionally, you can pass these updated coordinates back to a parent component
+    if (props.onMarkerDragEnd) {
+      props.onMarkerDragEnd(lngLat.lng, lngLat.lat);
+      setMarker({ longitude: lngLat.lng, latitude: lngLat.lat });
+    }
+  };
+
+  const handleGeocoderResult = (result) => {
+    const location = result?.center || (result.geometry?.type === "Point" && result.geometry.coordinates);
+    if (location) {
+      setMarker({ longitude: location[0], latitude: location[1] });
+      // Zoom to a suitable level after geocoding
+      if (mapRef.current) {
+        mapRef.current.flyTo({
+          center: location,
+          zoom: 16, // Adjust zoom level as needed
+          duration: 2000 // Optional animation duration
+        });
+      }
+    }
+    if(props.getResults){
+      props.getResults(result);
+    }
+  };
+
+  useEffect(() => {
+    if (props.longitude && props.latitude) {
+      setMarker({ longitude: props.longitude, latitude: props.latitude });
+    }
+  }, [props.longitude, props.latitude]);
+
   return (
     <>
       <Map
+        ref={mapRef}
         initialViewState={{
-          longitude: props.longitude ? props.longitude : 68.2605725,
           latitude: props.latitude ? props.latitude : 25.4080005,
-          zoom: 17,
-          pitch: 70,
+          longitude: props.longitude ? props.longitude : 68.2605725,
+          zoom: 18.01,
+          bearing: 0,
+          pitch: 77,
           antialias: true,
         }}
 
         mapStyle="mapbox://styles/mapbox/outdoors-v12"
         mapboxAccessToken={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}
         maxPitch={80}
+        onClick={handleMapClick}
 
         // mapStyle="mapbox://styles/mapbox/streets-v9"
         // mapStyle="mapbox://styles/mapbox/satellite-v9"
@@ -91,20 +135,22 @@ const Mapbox = (props) => {
           <GeocoderControl
             mapboxAccessToken={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}
             position="top-left"
-            onLoading={() => console.log("Loading...")}
+            onLoading={() => console.log("Loading GeoCoder...")}
             onResults={(results) => console.log("Results:", results)}
-            onResult={props.getResults}
+            onResult={handleGeocoderResult}
             onError={(error) => console.error("Error:", error)}
             marker={true}
             setShowCustomName={props.setShowCustomName}
           />
         ) : null}
 
-        {props.showMarker ? (
+        {props.showMarker && marker && (
           <Marker 
-            longitude={props.longitude ? props.longitude : 68.2605725}
             latitude={props.latitude ? props.latitude : 25.4080005}
+            longitude={props.longitude ? props.longitude : 68.2605725}
             anchor="bottom"
+            draggable
+            onDragEnd={handleMarkerDragEnd}
             // onClick={e => {
             //   // If we let the click event propagates to the map, it will immediately close the popup
             //   // with `closeOnClick: true`
@@ -114,8 +160,9 @@ const Mapbox = (props) => {
             //     lat: props.latitude ? props.latitude : "25.4080005"
             //   });
             // }}
-          />
-        ) : null}
+          >
+          /</Marker>
+        )}
 
         <Layer {...threeDLayer} />
 
