@@ -115,13 +115,12 @@ const MessageBar = () => {
   return (
 
     // message bar structure and styling
-    <div className="h-[10vh] bg-[#1c1d25] flex justify-center items-center px-8 mb-6 gap-6 ">
-      <div className="flex-1 flex bg-[#2a2b33] rounded-md items-center gap-5 pr-5">
-        {/* input field for entering text message content */}
+    <div className="h-[20vh] bg-[#1c1d25] flex md:flex-row items-center px-4 py-2 md:px-8 md:py-6 gap-2 md:gap-6"> {/* Changed to flex-col on small screens */}
+      <div className="flex-grow flex bg-[#2a2b33] max-w-[80%] rounded-md items-center pr-2 md:pr-5 w-full md:w-auto"> {/* Added flex-grow and w-full for input */}
         <input
           type="text"
-          className="flex-1 p-5 bg-transparent rounded-md focus:border-none focus:outline-none"
-          placeholder="enter message"
+          className="flex-grow p-2 md:p-5 bg-transparent rounded-md focus:border-none focus:outline-none w-full"
+          placeholder="Enter message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
@@ -144,7 +143,7 @@ const MessageBar = () => {
             open={locationPickerOpen}
             onOpenChange={setLocationPickerOpen}
           >
-            <DialogContent className="bg-[#181920] border-none text-white w-[500px] h-[550px] flex flex-col">
+            <DialogContent className="bg-[#181920] border-none text-white w-full h-[580px] md:w-[500px] md:h-[550px] flex flex-col">
               <DialogHeader>
                 <DialogTitle>Add a Location</DialogTitle>
                 <DialogDescription>
@@ -213,10 +212,10 @@ const MessageBar = () => {
 
       {/* button for sending message */}
       <button
-        className="bg-[#8417ff] rounded-md flex items-center justify-center p-5 focus:border-none hover:bg-[#741bda] focus:outline-none focus:text-white transition-all duration-300"
+        className="bg-[#8417ff] rounded-md flex items-center justify-center p-3 md:p-5 focus:border-none hover:bg-[#741bda] focus:outline-none focus:text-white transition-all duration-300"
         onClick={handleSendMessage}
       >
-        <IoSend className="text-2xl" />
+        <IoSend className="text-xl md:text-2xl" /> {/* Adjusted icon size */}
       </button>
     </div>
   );

@@ -25,7 +25,7 @@ const MessageContainer = () => {
 
   // boolean for showing message location dialog
   const [showLocation, setShowLocation] = useState(false);
-  const [showAR, setShowAR] = useState(false)
+  // const [showAR, setShowAR] = useState(false)
 
   // variable for storing user's current location
   const [currentLocation, setCurrentLocation] = useState({});
@@ -204,7 +204,7 @@ const MessageContainer = () => {
             message.sender !== selectedChatData._id
               ? "bg-[#00ccff]/5 text-[#00ccff]/90 border-[#00ccff]/50"
               : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
-          } border inline-block p-4 rounded my-1 max-w-[66%] break-words
+          } border inline-block p-4 rounded my-1 max-w-[95%] break-words
         `}
         >
           {/* logic for showing message content based on location and time
@@ -274,15 +274,15 @@ const MessageContainer = () => {
                       </span>
                     </div>
                   ) : null}
-                  <div className="flex gap-4 text-[#808080] text-xs">
+                  <div className="flex gap-2 text-[#808080] text-xs">
                     {/* show message receiving time */}
                     <span className="flex gap-2 items-center">
-                      {`${receivedDate} ${receivedTime}`}{" "}
+                      {`${moment(receivedDate).format("MMM Do")} ${receivedTime}`}{" "}
                       <FaHourglassStart />
                     </span>
                     {/* show message expiration time */}
                     <span className="flex gap-2 items-center">
-                      {`${expiryDate} ${expiryTime}`}{" "}
+                      {`${moment(expiryDate).format("MMM Do")} ${expiryTime}`}{" "}
                       <FaHourglassEnd />
                     </span>
                   </div>
@@ -311,7 +311,7 @@ const MessageContainer = () => {
         </Dialog>
 
         {/* show AR component in realtime camera feedback within a dialog */}
-        <Dialog open={showAR} onOpenChange={setShowAR}>
+        {/* <Dialog open={showAR} onOpenChange={setShowAR}>
           <DialogContent className="bg-[#181920] border-none text-white w-[600px] h-[580px] flex flex-col">
             <DialogHeader>
               <DialogTitle>Open Augmented Reality View</DialogTitle>
@@ -332,7 +332,7 @@ const MessageContainer = () => {
               ></a-entity>
             </a-scene>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
       </div>
     );
   };

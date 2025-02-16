@@ -102,11 +102,11 @@ const Auth = () => {
 
                         <div className='flex items-center justify-center'>
 
-                            <h1 className='text-5xl font-bold md:text-6xl'>Welcome</h1>
-                            <img src={victory} alt='victory emoji' className='h-[100px]' />
+                            <h1 className='text-4xl font-bold md:text-6xl'>Welcome</h1>
+                            <img src={victory} alt='victory emoji' className='h-[90px]' />
 
                         </div>
-                        <p className='font-medium text-center'>Get started with the MUET Location-Based Messaging and AR App</p>
+                        <p className='font-medium text-center'>An app based on the framework of Location-Based & AR Messaging</p>
 
                     </div>
 
