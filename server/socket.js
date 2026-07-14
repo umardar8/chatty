@@ -4,7 +4,7 @@ import Message from './models/MessagesModel.js';
 const setupSocket = (server) => {
   const io = new SocketIoServer(server, {
     cors: {
-      origin: 'https://chatty-muet.vercel.app',  // Allow requests from this origin
+      origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
       methods: ['GET', 'POST'],
       credentials: true, // Allow credentials (cookies) to be included in requests
     },

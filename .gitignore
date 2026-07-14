@@ -10,6 +10,7 @@ lerna-debug.log*
 # node modules
 client/node_modules/
 server/node_modules/
+client/dist/
 
 # .env files
 client/.env
