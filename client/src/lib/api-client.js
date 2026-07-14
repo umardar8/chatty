@@ -2,5 +2,5 @@ import axios from "axios";
 import { HOST } from "@/utils/constants.js";
 
 export const apiClient = axios.create({
-    baseURL: "https://chatty-muet-app.vercel.app",
+    baseURL: HOST,
 })
